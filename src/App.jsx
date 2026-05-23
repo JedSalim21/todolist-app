@@ -3,9 +3,12 @@ import InputArea from "./InputArea";
 import ToDoItem from "./ToDoItem";
 import Header from "./Header";
 import { supabase } from "./supabase/client";
+import SecurityUpdateGoodOutlinedIcon from "@mui/icons-material/SecurityUpdateGoodOutlined";
 
 function App() {
   const [items, setItems] = useState([]);
+  const [editingText, setEditingText] = useState(null);
+  const [editText, setEditText] = useState("");
 
   async function addItem(inputText) {
     const { data, error } = await supabase.from("items").insert([
@@ -36,6 +39,11 @@ function App() {
     fetchItems();
   }, []);
 
+  function handleEdit(item) {
+    setEditingText(item.id);
+    setEditText(item.text);
+  }
+
   async function deleteItem(id) {
     const { error } = await supabase.from("items").delete().eq("id", id);
 
@@ -48,8 +56,6 @@ function App() {
 
   async function toggleDone(id, currentDone) {
     const newValue = !currentDone;
-
-    //console.log("UPDATING TO:", newValue);
 
     const { error } = await supabase
       .from("items")
@@ -67,6 +73,22 @@ function App() {
     }
   }
 
+  async function handleUpdate(id) {
+    const { data, error } = await supabase
+      .from("items")
+      .update({
+        text: editText,
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.log(error);
+    } else {
+      setEditingText(null);
+      fetchItems();
+    }
+  }
+
   return (
     <div className="container">
       <div className="heading">
@@ -76,16 +98,35 @@ function App() {
       <InputArea onAdd={addItem} />
 
       <ul>
-        {items.map((item) => (
-          <ToDoItem
-            key={item.id}
-            id={item.id}
-            text={item.text}
-            done={item.done}
-            onDelete={deleteItem}
-            onChecked={toggleDone}
-          />
-        ))}
+        {items.map((item) => {
+          if (editingText === item.id) {
+            return (
+              <div key={item.id} className="note edit-box">
+                <input
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                />
+
+                <button onClick={() => handleUpdate(item.id)}>
+                  <SecurityUpdateGoodOutlinedIcon />
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <ToDoItem
+              key={item.id}
+              id={item.id}
+              text={item.text}
+              done={item.done}
+              onDelete={deleteItem}
+              onChecked={toggleDone}
+              onEdit={handleEdit}
+              note={item}
+            />
+          );
+        })}
       </ul>
     </div>
   );

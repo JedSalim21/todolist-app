@@ -2,6 +2,7 @@ import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 
 function ToDoItem(props) {
   function handleCheck() {
@@ -19,15 +20,25 @@ function ToDoItem(props) {
 
         <p className={props.done ? "completed" : ""}>{props.text}</p>
       </div>
+      <div className="todo-actions">
+        <button
+          className="edit-btn"
+          onClick={() => {
+            props.onEdit(props.note || props);
+          }}
+        >
+          <ModeEditOutlinedIcon />
+        </button>
 
-      <span
-        className="delete-btn"
-        onClick={() => {
-          props.onDelete(props.id);
-        }}
-      >
-        <DeleteIcon />
-      </span>
+        <span
+          className="delete-btn"
+          onClick={() => {
+            props.onDelete(props.id);
+          }}
+        >
+          <DeleteIcon />
+        </span>
+      </div>
     </li>
   );
 }
